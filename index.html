@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3.49</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #080c16;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #e2e8f0;
+    }
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    /* Encabezado minimalista: SOLO el número del ejercicio */
+    #top-bar {
+      position: absolute;
+      top: 24px;
+      left: 28px;
+      right: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+      z-index: 25;
+    }
+
+    #exercise-tag {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+      opacity: 0.95;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #exercise-tag::after {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #38bdf8;
+      border-radius: 50%;
+      box-shadow: 0 0 12px #38bdf8;
+    }
+
+    /* Selector de modo dual (Apartado 1: Estática 3.49 | Apartado 2: Falla Estructural) */
+    #mode-switcher {
+      pointer-events: auto;
+      display: flex;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 30px;
+      padding: 4px;
+      gap: 6px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+    }
+    .mode-tab {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 40px;
+      border-radius: 22px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      outline: none;
+    }
+    .mode-tab:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .mode-tab.active {
+      background: #38bdf8;
+      color: #0b0f19;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.5);
+    }
+    .mode-tab svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.2;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* Etiquetas de Agua y Hormigón: Pequeñas, alto contraste, NO invasivas */
+    .mat-label {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 15;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 14px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      transition: opacity 0.3s ease;
+    }
+    .mat-label.water {
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+    .mat-label.water::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #38bdf8;
+      box-shadow: 0 0 8px #38bdf8;
+    }
+    .mat-label.concrete {
+      color: #e2e8f0;
+      border-color: rgba(203, 213, 225, 0.4);
+    }
+    .mat-label.concrete::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #cbd5e1;
+      box-shadow: 0 0 8px #cbd5e1;
+    }
+
+    /* Etiquetas de Fuerzas y Momentos: Tipografía Matemática Profesional (Fracciones y Subíndices) */
+    .force-label {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 18;
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      background: rgba(11, 17, 32, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.75), inset 0 0 1px rgba(255, 255, 255, 0.25);
+      transition: opacity 0.25s ease;
+      opacity: 0;
+      line-height: 1;
+    }
+    .force-label.visible {
+      display: flex;
+      opacity: 1;
+    }
+
+    /* Fracción Matemática Vertical para h/3 */
+    .fraction {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      line-height: 1;
+      padding: 0 2px;
+    }
+    .fraction .num {
+      font-family: "Cambria Math", "TeX Gyre Termes", "Times New Roman", serif;
+      font-style: italic;
+      font-size: 11px;
+      font-weight: 700;
+      border-bottom: 1.5px solid currentColor;
+      padding-bottom: 1px;
+      margin-bottom: 1px;
+    }
+    .fraction .den {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-style: normal;
+      font-size: 10px;
+      font-weight: 800;
+      padding-top: 1px;
+    }
+
+    /* Tipografía Matemática Itálica y Subíndices Alineados */
+    .math-sym {
+      font-family: "Cambria Math", "TeX Gyre Termes", "Times New Roman", serif;
+      font-style: italic;
+      font-size: 13.5px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    .sub-sym {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-style: normal;
+      font-size: 8.5px;
+      font-weight: 800;
+      vertical-align: -3px;
+      letter-spacing: 0.3px;
+      margin-left: 1px;
+      opacity: 0.95;
+    }
+
+    .force-label::before {
+      content: "";
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+    }
+
+    .force-label.fh {
+      color: #ff2a85;
+      border: 1px solid rgba(255, 42, 133, 0.55);
+    }
+    .force-label.fh::before {
+      background: #ff2a85;
+      box-shadow: 0 0 10px #ff2a85;
+    }
+
+    .force-label.w {
+      color: #facc15;
+      border: 1px solid rgba(250, 204, 21, 0.55);
+    }
+    .force-label.w::before {
+      background: #facc15;
+      box-shadow: 0 0 10px #facc15;
+    }
+
+    .force-label.n {
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.55);
+    }
+    .force-label.n::before {
+      background: #10b981;
+      box-shadow: 0 0 10px #10b981;
+    }
+
+    .force-label.fr {
+      color: #f97316;
+      border: 1px solid rgba(249, 115, 22, 0.55);
+    }
+    .force-label.fr::before {
+      background: #f97316;
+      box-shadow: 0 0 10px #f97316;
+    }
+
+    .force-label.mv {
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.6);
+    }
+    .force-label.mv::before {
+      background: #ef4444;
+      box-shadow: 0 0 10px #ef4444;
+    }
+
+    .force-label.me {
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.6);
+    }
+    .force-label.me::before {
+      background: #22c55e;
+      box-shadow: 0 0 10px #22c55e;
+    }
+
+    .force-label.piv {
+      color: #ffffff;
+      border: 1px solid rgba(244, 63, 94, 0.65);
+    }
+    .force-label.piv::before {
+      background: #f43f5e;
+      box-shadow: 0 0 10px #f43f5e;
+    }
+
+    .force-label.cp {
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.5);
+    }
+    .force-label.cp::before {
+      background: #38bdf8;
+      box-shadow: 0 0 10px #38bdf8;
+    }
+
+    /* Barra de control flotante HUD (Modo 1: Estática) */
+    #ui-hud {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 10px 18px;
+      border-radius: 40px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      z-index: 20;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    #ui-hud.hidden {
+      opacity: 0;
+      transform: translate(-50%, 40px);
+      pointer-events: none;
+    }
+
+    /* HUD para Modo 2 (Falla Estructural) */
+    #failure-hud {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+      align-items: center;
+      gap: 14px;
+      background: rgba(15, 23, 42, 0.82);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 10px 20px;
+      border-radius: 40px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+      z-index: 20;
+    }
+    #failure-hud.active {
+      display: flex;
+    }
+
+    .hud-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #e2e8f0;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      outline: none;
+    }
+    .hud-btn:hover {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: #38bdf8;
+      color: #ffffff;
+      transform: scale(1.08);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+    }
+    .hud-btn.active {
+      background: #38bdf8;
+      border-color: #38bdf8;
+      color: #0b0f19;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.6);
+    }
+    .hud-btn.danger {
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+    .hud-btn.danger:hover {
+      background: rgba(239, 68, 68, 0.25);
+      border-color: #ef4444;
+      box-shadow: 0 0 14px rgba(239, 68, 68, 0.5);
+    }
+    .hud-btn.danger.active {
+      background: #ef4444;
+      border-color: #ef4444;
+      color: #ffffff;
+      box-shadow: 0 0 18px rgba(239, 68, 68, 0.7);
+    }
+    .hud-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.2;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .divider {
+      width: 1px;
+      height: 24px;
+      background: rgba(255, 255, 255, 0.15);
+      margin: 0 4px;
+    }
+
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 8px;
+    }
+    .slider-wrap svg {
+      width: 18px;
+      height: 18px;
+      stroke: #94a3b8;
+    }
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 130px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #38bdf8;
+      cursor: pointer;
+      box-shadow: 0 0 10px #38bdf8;
+      transition: transform 0.15s ease;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.25);
+    }
+
+    /* Puntos de fase del Modo 1 */
+    #phase-dots {
+      position: absolute;
+      right: 28px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 20;
+    }
+    .phase-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .phase-dot:hover {
+      transform: scale(1.4);
+      background: rgba(56, 189, 248, 0.6);
+    }
+    .phase-dot.active {
+      background: #38bdf8;
+      border-color: #38bdf8;
+      box-shadow: 0 0 12px #38bdf8;
+      transform: scale(1.3);
+    }
+
+    #key-hint {
+      position: absolute;
+      bottom: 24px;
+      right: 28px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.35);
+      letter-spacing: 0.5px;
+      z-index: 10;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra Superior: Identificador 3.49 y Selector de Modo -->
+  <div id="top-bar">
+    <div id="exercise-tag">3.49</div>
+
+    <!-- Pestañas de Modo (1: Estática/Equilibrio 3.49 | 2: Falla Estructural Pared Delgada) -->
+    <div id="mode-switcher">
+      <!-- Pestaña 1: Análisis Mecánico y Fuerzas -->
+      <button class="mode-tab active" id="tab-static" title="Equilibrio de Cargas y Estática">
+        <svg viewBox="0 0 24 24"><path d="M12 3v18M3 9l9-6 9 6M6 12l-3 6h6l-3-6M18 12l-3 6h6l-3-6"/></svg>
+      </button>
+      <!-- Pestaña 2: Simulación de Falla por Fractura -->
+      <button class="mode-tab" id="tab-failure" title="Simulación de Rotura y Falla Estructural">
+        <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="canvas-container"></div>
+
+  <!-- Etiquetas discretas no invasivas de materiales con excelente contraste -->
+  <div class="mat-label water" id="label-water">Agua</div>
+  <div class="mat-label concrete" id="label-concrete">Hormigón</div>
+
+  <!-- Etiquetas de Fuerzas y Momentos: Tipografía Matemática Impecable -->
+  <div class="force-label fh" id="lbl-fh"><span class="math-sym">F</span><span class="sub-sym">H</span></div>
+  <div class="force-label cp" id="lbl-cp"><div class="fraction"><span class="num">h</span><span class="den">3</span></div></div>
+  <div class="force-label w" id="lbl-w"><span class="math-sym">W</span></div>
+  <div class="force-label n" id="lbl-n"><span class="math-sym">N</span></div>
+  <div class="force-label fr" id="lbl-fr"><span class="math-sym">F</span><span class="sub-sym">R</span></div>
+  <div class="force-label mv" id="lbl-mv"><span class="math-sym">M</span><span class="sub-sym">volc</span></div>
+  <div class="force-label me" id="lbl-me"><span class="math-sym">M</span><span class="sub-sym">est</span></div>
+  <div class="force-label piv" id="lbl-piv"><span class="math-sym">O</span></div>
+
+  <!-- HUD MODO 1: ESTÁTICA Y EQUILIBRIO 3.49 -->
+  <div id="ui-hud">
+    <button class="hud-btn" id="btn-play" title="Play / Pausa">
+      <svg id="icon-play" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/></svg>
+      <svg id="icon-pause" viewBox="0 0 24 24" style="display:none;"><rect x="6" y="4" width="4" height="16" fill="currentColor"/><rect x="14" y="4" width="4" height="16" fill="currentColor"/></svg>
+    </button>
+
+    <div class="divider"></div>
+
+    <button class="hud-btn" id="btn-prev" title="Fase anterior">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <button class="hud-btn" id="btn-next" title="Fase siguiente">
+      <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+
+    <div class="divider"></div>
+
+    <button class="hud-btn" id="btn-dimension" title="2D / 3D">
+      <svg id="icon-3d" viewBox="0 0 24 24">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+      </svg>
+    </button>
+
+    <div class="divider"></div>
+
+    <div class="slider-wrap">
+      <svg viewBox="0 0 24 24"><path d="M21 12H3M21 6H3M21 18H3"/></svg>
+      <input type="range" id="slider-width" min="1.0" max="4.5" step="0.05" value="3.09">
+    </div>
+
+    <div class="divider"></div>
+
+    <button class="hud-btn" id="btn-reset" title="Reiniciar">
+      <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><polyline points="3 3 3 8 8 8"/></svg>
+    </button>
+
+    <button class="hud-btn" id="btn-fullscreen" title="Pantalla completa">
+      <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+    </button>
+  </div>
+
+  <!-- HUD MODO 2: FALLA Y FRACTURA ESTRUCTURAL -->
+  <div id="failure-hud">
+    <!-- Disparo / Ejecución de Fractura -->
+    <button class="hud-btn danger" id="btn-fracture-trigger" title="Disparar Fractura">
+      <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/></svg>
+    </button>
+
+    <div class="divider"></div>
+
+    <!-- Velocidad Lenta (Slow-Motion) para detalle en clase -->
+    <button class="hud-btn" id="btn-slowmo" title="Cámara Lenta">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </button>
+
+    <div class="divider"></div>
+
+    <!-- Alternar Vista 2D / 3D en Modo Falla -->
+    <button class="hud-btn" id="btn-dimension-fail" title="2D / 3D">
+      <svg viewBox="0 0 24 24">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+      </svg>
+    </button>
+
+    <div class="divider"></div>
+
+    <!-- Reinicio de Falla -->
+    <button class="hud-btn" id="btn-reset-fail" title="Restaurar Pared">
+      <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><polyline points="3 3 3 8 8 8"/></svg>
+    </button>
+  </div>
+
+  <!-- Selector de fase (Modo 1) -->
+  <div id="phase-dots">
+    <div class="phase-dot active" data-phase="0"></div>
+    <div class="phase-dot" data-phase="1"></div>
+    <div class="phase-dot" data-phase="2"></div>
+    <div class="phase-dot" data-phase="3"></div>
+    <div class="phase-dot" data-phase="4"></div>
+    <div class="phase-dot" data-phase="5"></div>
+  </div>
+
+  <div id="key-hint">[H] HUD &nbsp;|&nbsp; [Espacio] Play/Pausa &nbsp;|&nbsp; [V] 2D/3D &nbsp;|&nbsp; [T] Cambiar Apartado</div>
+
+  <!-- Librerías locales Three.js -->
+  <script src="three.min.js"></script>
+  <script src="OrbitControls.js"></script>
+  <script>
+    if (typeof THREE === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
+      document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"><\/script>');
+    }
+  </script>
+
+  <script>
+    /* =========================================================================
+       SISTEMA DUAL: ESTÁTICA 3.49 + FALLA ESTRUCTURAL DE PARED DELGADA
+       ========================================================================= */
+
+    // Modos de Operación
+    const MODE_STATIC = 0;
+    const MODE_FAILURE = 1;
+    let activeMode = MODE_STATIC;
+
+    // Parámetros Físicos
+    const H_WALL = 6.0;
+    const H_WATER = 5.0;
+    const B_DESIGN = 3.09;
+    const B_THIN = 0.55;         // Espesor crítico en modo pared delgada
+    const DEPTH_3D = 2.4;        // Profundidad del volumen de control
+    const FRONT_PLANE_Z = (DEPTH_3D / 2) + 0.35; // Plano adelantado para máxima visibilidad
+
+    let currentB = B_DESIGN;
+    let currentPhase = 0;
+    let is3D = false;
+    let isPlaying = true;
+    let cinematicTimer = 0;
+    const PHASE_DURATION = 7.0;
+
+    // Estado del Modo Falla
+    let failureState = 0; // 0: Reposo intacto, 1: En fractura dinámica, 2: Roto y colapsado
+    let failureProgress = 0.0;
+    let isSlowMo = false;
+
+    // Escena y Renderizador
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x070b14);
+    scene.fog = new THREE.FogExp2(0x070b14, 0.022);
+
+    const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2 + 0.05;
+
+    // Posiciones de cámara
+    const camTarget = new THREE.Vector3(1.2, 2.7, 0);
+    const pos2D = new THREE.Vector3(1.2, 2.7, 14.8);
+    const pos3D = new THREE.Vector3(9.8, 7.8, 11.5);
+    let desiredCamPos = pos2D.clone();
+    let desiredLookAt = camTarget.clone();
+
+    camera.position.copy(pos2D);
+    controls.target.copy(camTarget);
+
+    // Iluminación
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
+    dirLight.position.set(14, 20, 16);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
+    scene.add(dirLight);
+
+    const fillLight = new THREE.DirectionalLight(0x38bdf8, 0.5);
+    fillLight.position.set(-12, 10, -6);
+    scene.add(fillLight);
+
+    // =========================================================================
+    // GRUPOS MAESTROS DE ESCENA
+    // =========================================================================
+
+    const staticSceneGroup = new THREE.Group();
+    scene.add(staticSceneGroup);
+
+    const failureSceneGroup = new THREE.Group();
+    failureSceneGroup.visible = false;
+    scene.add(failureSceneGroup);
+
+    // Terreno Común
+    const groundGroup = new THREE.Group();
+    scene.add(groundGroup);
+
+    const groundMeshMat = new THREE.MeshStandardMaterial({ color: 0x131d2e, roughness: 0.95 });
+    const groundMesh = new THREE.Mesh(new THREE.BoxGeometry(26, 1.2, 14), groundMeshMat);
+    groundMesh.position.set(0, -0.6, 0);
+    groundMesh.receiveShadow = true;
+    groundGroup.add(groundMesh);
+
+    const hatchMat = new THREE.LineBasicMaterial({ color: 0x334155, transparent: true, opacity: 0.65 });
+    for (let x = -9; x <= 9; x += 0.5) {
+      const hGeo = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(x, 0.005, -6),
+        new THREE.Vector3(x + 0.45, 0.005, 6)
+      ]);
+      groundGroup.add(new THREE.Line(hGeo, hatchMat));
+    }
+
+    // Materiales de Hormigón y Agua
+    const wallMaterial = new THREE.MeshStandardMaterial({
+      color: 0x8291a5,
+      roughness: 0.75,
+      metalness: 0.15
+    });
+    const wallWireMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.25 });
+
+    const waterMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0x0284c7,
+      transmission: 0.72,
+      opacity: 0.85,
+      transparent: true,
+      roughness: 0.08,
+      ior: 1.333,
+      reflectivity: 0.7,
+      depthWrite: false
+    });
+
+    // Malla de Agua (Modo 1)
+    const waterGeo = new THREE.BoxGeometry(6.5, H_WATER, DEPTH_3D);
+    const waterMesh = new THREE.Mesh(waterGeo, waterMaterial);
+    waterMesh.position.set(-3.25, H_WATER / 2, 0);
+    staticSceneGroup.add(waterMesh);
+
+    const waterTopMat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      roughness: 0.1,
+      metalness: 0.2,
+      transparent: true,
+      opacity: 0.75
+    });
+    const waterTopMesh = new THREE.Mesh(new THREE.PlaneGeometry(6.5, DEPTH_3D), waterTopMat);
+    waterTopMesh.rotation.x = -Math.PI / 2;
+    waterTopMesh.position.set(-3.25, H_WATER + 0.002, 0);
+    staticSceneGroup.add(waterTopMesh);
+
+    // Símbolo de nivel de agua
+    const levelMarkerGroup = new THREE.Group();
+    const triShape = new THREE.Shape();
+    triShape.moveTo(-0.25, 0);
+    triShape.lineTo(0.25, 0);
+    triShape.lineTo(0, -0.35);
+    triShape.closePath();
+    const triMesh = new THREE.Mesh(new THREE.ShapeGeometry(triShape), new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide }));
+    levelMarkerGroup.add(triMesh);
+    const l1 = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-0.35, -0.42, 0), new THREE.Vector3(0.35, -0.42, 0)]), new THREE.LineBasicMaterial({ color: 0x38bdf8 }));
+    const l2 = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-0.2, -0.5, 0), new THREE.Vector3(0.2, -0.5, 0)]), new THREE.LineBasicMaterial({ color: 0x38bdf8 }));
+    levelMarkerGroup.add(l1, l2);
+    levelMarkerGroup.position.set(-1.4, H_WATER + 0.45, FRONT_PLANE_Z);
+    staticSceneGroup.add(levelMarkerGroup);
+
+    // Muro de Hormigón (Modo 1)
+    const wallRootGroup = new THREE.Group();
+    staticSceneGroup.add(wallRootGroup);
+    let wallMesh = null;
+    let wallWire = null;
+
+    // =========================================================================
+    // GRUPO DE FUERZAS Y MOMENTOS (UBICADOS EN EL PLANO FRONTAL ADELANTADO)
+    // =========================================================================
+
+    const frontForcesGroup = new THREE.Group();
+    frontForcesGroup.position.z = FRONT_PLANE_Z; // ADELANTE DEL VOLUMEN DE CONTROL
+    staticSceneGroup.add(frontForcesGroup);
+
+    // 1. Distribución 2D de presiones (flechas)
+    const pressure2DGroup = new THREE.Group();
+    frontForcesGroup.add(pressure2DGroup);
+
+    const ARROW_COUNT = 9;
+    const arrowMeshes2D = [];
+    for (let i = 0; i < ARROW_COUNT; i++) {
+      const yNorm = i / (ARROW_COUNT - 1);
+      const y = yNorm * H_WATER;
+      const pRatio = (H_WATER - y) / H_WATER;
+      const arrowLength = pRatio * 2.3 + 0.01;
+
+      const arrow = createHighVisArrow({
+        color: 0x00f0ff,
+        dir: new THREE.Vector3(1, 0, 0),
+        origin: new THREE.Vector3(-arrowLength, y, 0),
+        length: arrowLength,
+        headLength: Math.min(0.28, arrowLength * 0.4),
+        headWidth: 0.14,
+        shaftRadius: 0.03
+      });
+      pressure2DGroup.add(arrow);
+      arrowMeshes2D.push(arrow);
+    }
+
+    const triangleEdgeGeo = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(0, H_WATER, 0.01),
+      new THREE.Vector3(-2.3, 0, 0.01),
+      new THREE.Vector3(0, 0, 0.01),
+      new THREE.Vector3(0, H_WATER, 0.01)
+    ]);
+    const triangleEdgeLine = new THREE.Line(triangleEdgeGeo, new THREE.LineBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.9 }));
+    pressure2DGroup.add(triangleEdgeLine);
+
+    // 2. Prisma 3D Volumétrico
+    const pressurePrismGroup = new THREE.Group();
+    staticSceneGroup.add(pressurePrismGroup);
+
+    const triangleShape = new THREE.Shape();
+    triangleShape.moveTo(0, H_WATER);
+    triangleShape.lineTo(-2.3, 0);
+    triangleShape.lineTo(0, 0);
+    triangleShape.closePath();
+    const prismGeo = new THREE.ExtrudeGeometry(triangleShape, { steps: 1, depth: DEPTH_3D, bevelEnabled: false });
+    prismGeo.translate(0, 0, -DEPTH_3D / 2);
+    const prismMesh = new THREE.Mesh(prismGeo, new THREE.MeshPhysicalMaterial({
+      color: 0x00e5ff,
+      transmission: 0.65,
+      opacity: 0.55,
+      transparent: true,
+      roughness: 0.15,
+      depthWrite: false
+    }));
+    pressurePrismGroup.add(prismMesh);
+    pressurePrismGroup.add(new THREE.LineSegments(new THREE.EdgesGeometry(prismGeo), new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.9 })));
+
+    // 3. VECTOR RESULTANTE DE EMPUJE (F_H a 1/3 de la base)
+    // CAMBIO DE COLOR: MAGENTA/FUCSIA ELÉCTRICO NEÓN VIBRANTE (#ff2a85) PARA MÁXIMO CONTRASTE
+    const fhGroup = new THREE.Group();
+    frontForcesGroup.add(fhGroup);
+
+    const Y_CP = H_WATER / 3.0; // 1.667 m
+    const FH_LEN = 3.4;
+    const COLOR_FH = 0xff2a85; // Magenta Neón vibrante
+
+    const arrowFH = createHighVisArrow({
+      color: COLOR_FH,
+      dir: new THREE.Vector3(1, 0, 0),
+      origin: new THREE.Vector3(-FH_LEN, Y_CP, 0),
+      length: FH_LEN,
+      headLength: 0.55,
+      headWidth: 0.32,
+      shaftRadius: 0.075,
+      glowIntensity: 0.5
+    });
+    fhGroup.add(arrowFH);
+
+    // Anillo y marcador en el centro de presiones
+    const cpMarker = new THREE.Mesh(new THREE.SphereGeometry(0.14, 24, 24), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+    cpMarker.position.set(0, Y_CP, 0);
+    const cpRing = new THREE.Mesh(new THREE.RingGeometry(0.18, 0.26, 32), new THREE.MeshBasicMaterial({ color: COLOR_FH, side: THREE.DoubleSide }));
+    cpRing.position.set(0, Y_CP, 0.01);
+    fhGroup.add(cpMarker, cpRing);
+
+    // Cota de altura h/3
+    const cpHightLine = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-0.02, 0, 0), new THREE.Vector3(-0.02, Y_CP, 0)]),
+      new THREE.LineDashedMaterial({ color: COLOR_FH, dashSize: 0.15, gapSize: 0.1 })
+    );
+    cpHightLine.computeLineDistances();
+    fhGroup.add(cpHightLine);
+
+    // 4. Peso Propio (W) y Reacción Normal (N) en Plano Frontal
+    const weightGroup = new THREE.Group();
+    frontForcesGroup.add(weightGroup);
+
+    let arrowW = null;
+    let arrowN = null;
+    let cgMarker = null;
+
+    // 5. Fuerza de Rozamiento (F_R)
+    const frictionGroup = new THREE.Group();
+    frontForcesGroup.add(frictionGroup);
+    let arrowFR = null;
+
+    // 6. Pivote O y Arcos de Momentos
+    const overturnGroup = new THREE.Group();
+    frontForcesGroup.add(overturnGroup);
+
+    const pivotO = new THREE.Mesh(new THREE.SphereGeometry(0.16, 24, 24), new THREE.MeshBasicMaterial({ color: 0xf43f5e }));
+    const pivotRing = new THREE.Mesh(new THREE.RingGeometry(0.2, 0.28, 32), new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide }));
+    pivotRing.position.z = 0.01;
+    overturnGroup.add(pivotO, pivotRing);
+
+    const momentArcGroup = new THREE.Group();
+    overturnGroup.add(momentArcGroup);
+
+    // =========================================================================
+    // APARTADO 2: MODO FALLA ESTRUCTURAL DE PARED DELGADA
+    // =========================================================================
+
+    // Muro Delgado Fracturable: Se divide en Parte Inferior fija y Parte Superior rotatoria
+    const failWallGroup = new THREE.Group();
+    failureSceneGroup.add(failWallGroup);
+
+    const Y_CRACK = 1.35; // Altura de la grieta de flexión
+    const failMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.8 });
+    const tensionGlowMat = new THREE.MeshBasicMaterial({ color: 0xef4444, transparent: true, opacity: 0.85 });
+
+    // Parte inferior fija
+    const lowerWallMesh = new THREE.Mesh(new THREE.BoxGeometry(B_THIN, Y_CRACK, DEPTH_3D), failMat);
+    lowerWallMesh.position.set(B_THIN / 2, Y_CRACK / 2, 0);
+    failWallGroup.add(lowerWallMesh);
+
+    // Pivote de fractura para el bloque superior
+    const upperWallPivot = new THREE.Group();
+    upperWallPivot.position.set(B_THIN, Y_CRACK, 0); // Eje en la arista de compresión
+    failWallGroup.add(upperWallPivot);
+
+    const upperHeight = H_WALL - Y_CRACK;
+    const upperWallMesh = new THREE.Mesh(new THREE.BoxGeometry(B_THIN, upperHeight, DEPTH_3D), failMat);
+    upperWallMesh.position.set(-B_THIN / 2, upperHeight / 2, 0);
+    upperWallPivot.add(upperWallMesh);
+
+    // Grieta dinámica de tracción
+    const crackPlane = new THREE.Mesh(new THREE.PlaneGeometry(B_THIN * 1.05, 0.12), tensionGlowMat);
+    crackPlane.rotation.x = -Math.PI / 2;
+    crackPlane.position.set(B_THIN / 2, Y_CRACK, 0);
+    failWallGroup.add(crackPlane);
+
+    // Masa de agua para Modo Falla
+    const failWaterMesh = new THREE.Mesh(new THREE.BoxGeometry(6.5, H_WATER, DEPTH_3D), waterMaterial);
+    failWaterMesh.position.set(-3.25, H_WATER / 2, 0);
+    failureSceneGroup.add(failWaterMesh);
+
+    // Torrente de agua desbordada al romperse la presa
+    const floodSurgeGeo = new THREE.BoxGeometry(7.0, 1.4, DEPTH_3D);
+    const floodSurgeMesh = new THREE.Mesh(floodSurgeGeo, waterMaterial);
+    floodSurgeMesh.position.set(3.8, 0.7, 0);
+    floodSurgeMesh.scale.set(0.01, 0.01, 1);
+    floodSurgeMesh.visible = false;
+    failureSceneGroup.add(floodSurgeMesh);
+
+    // Flecha de empuje hidrostático excesivo en la pared delgada
+    const failArrowFH = createHighVisArrow({
+      color: 0xef4444, // Rojo advertencia
+      dir: new THREE.Vector3(1, 0, 0),
+      origin: new THREE.Vector3(-3.2, Y_CP, FRONT_PLANE_Z),
+      length: 3.2,
+      headLength: 0.5,
+      headWidth: 0.3,
+      shaftRadius: 0.08,
+      glowIntensity: 0.6
+    });
+    failureSceneGroup.add(failArrowFH);
+
+    // =========================================================================
+    // CONSTRUCCIÓN Y ACTUALIZACIÓN DINÁMICA DE FUERZAS
+    // =========================================================================
+
+    updateWallGeometry(currentB);
+
+    function updateWallGeometry(b) {
+      if (wallMesh) {
+        wallRootGroup.remove(wallMesh);
+        wallMesh.geometry.dispose();
+      }
+      if (wallWire) {
+        wallRootGroup.remove(wallWire);
+        wallWire.geometry.dispose();
+      }
+
+      const geo = new THREE.BoxGeometry(b, H_WALL, DEPTH_3D);
+      wallMesh = new THREE.Mesh(geo, wallMaterial);
+      wallMesh.position.set(b / 2, H_WALL / 2, 0);
+      wallMesh.castShadow = true;
+      wallMesh.receiveShadow = true;
+      wallRootGroup.add(wallMesh);
+
+      wallWire = new THREE.LineSegments(new THREE.EdgesGeometry(geo), wallWireMat);
+      wallWire.position.copy(wallMesh.position);
+      wallRootGroup.add(wallWire);
+
+      // Posicionar pivote O en (b, 0, 0)
+      pivotO.position.set(b, 0, 0);
+      pivotRing.position.set(b, 0, 0.01);
+
+      // 4. Peso Propio W y Reacción Normal N (Separación Horizontal limpia para evitar solapamiento)
+      if (arrowW) weightGroup.remove(arrowW);
+      if (arrowN) weightGroup.remove(arrowN);
+      if (cgMarker) weightGroup.remove(cgMarker);
+
+      const xCentroid = b / 2;
+      const yCentroid = H_WALL / 2;
+
+      // Vector Peso W: En el eje vertical a la izquierda del centroide (apunta abajo, termina en y=0.8 m sin cruzar el piso)
+      const xW = xCentroid - 0.35;
+      arrowW = createHighVisArrow({
+        color: 0xfacc15, // Oro intenso brillante
+        dir: new THREE.Vector3(0, -1, 0),
+        origin: new THREE.Vector3(xW, yCentroid, 0),
+        length: 2.2,
+        headLength: 0.45,
+        headWidth: 0.26,
+        shaftRadius: 0.065,
+        glowIntensity: 0.4
+      });
+      weightGroup.add(arrowW);
+
+      // Marcador en el Centro de Gravedad geométrico real
+      cgMarker = new THREE.Mesh(new THREE.SphereGeometry(0.13, 24, 24), new THREE.MeshBasicMaterial({ color: 0xfef08a }));
+      cgMarker.position.set(xCentroid, yCentroid, 0.02);
+      weightGroup.add(cgMarker);
+
+      // Vector Reacción Normal N: Desplazada hacia el tercio exterior derecho (reacción del suelo al vuelco)
+      // Nace a ras de base en y=0.03 y apunta hacia arriba hasta y=2.0 m
+      const xN = Math.min(b - 0.4, xCentroid + 0.45);
+      arrowN = createHighVisArrow({
+        color: 0x10b981, // Verde esmeralda brillante
+        dir: new THREE.Vector3(0, 1, 0),
+        origin: new THREE.Vector3(xN, 0.03, 0),
+        length: 1.95,
+        headLength: 0.45,
+        headWidth: 0.26,
+        shaftRadius: 0.065,
+        glowIntensity: 0.35
+      });
+      weightGroup.add(arrowN);
+
+      // 5. Fuerza de Rozamiento F_R en la interfaz de la base
+      if (arrowFR) frictionGroup.remove(arrowFR);
+      const isUnsafe = (b < 2.06);
+      const frColor = isUnsafe ? 0xef4444 : 0xf97316;
+      const FR_LEN = Math.max(0.6, (b / B_DESIGN) * 2.8);
+
+      arrowFR = createHighVisArrow({
+        color: frColor,
+        dir: new THREE.Vector3(-1, 0, 0),
+        origin: new THREE.Vector3(b * 0.75, 0.04, 0),
+        length: FR_LEN,
+        headLength: 0.45,
+        headWidth: 0.26,
+        shaftRadius: 0.065,
+        glowIntensity: 0.4
+      });
+      frictionGroup.add(arrowFR);
+
+      // 6. Arcos de Momento
+      updateMomentArcs(b);
+    }
+
+    function updateMomentArcs(b) {
+      while (momentArcGroup.children.length > 0) {
+        momentArcGroup.remove(momentArcGroup.children[0]);
+      }
+
+      // 1. Momento volcador M_volc (Horario, Rojo)
+      // Situado en el cuadrante superior derecho de O: theta va de 0.12*PI (21.6°) a 0.55*PI (99°)
+      // Altura mínima: r * sin(0.12*PI) = 1.7 * 0.368 = 0.63 m sobre el piso -> ¡NUNCA TOCA EL SUELO!
+      const rOver = 1.7;
+      const arcOverGeo = new THREE.RingGeometry(rOver - 0.04, rOver + 0.05, 42, 1, Math.PI * 0.12, Math.PI * 0.43);
+      const arcOverMesh = new THREE.Mesh(arcOverGeo, new THREE.MeshBasicMaterial({ color: 0xef4444, side: THREE.DoubleSide }));
+      arcOverMesh.position.set(b, 0, 0.02);
+      momentArcGroup.add(arcOverMesh);
+
+      // Punta cónica en theta = 0.12*PI apuntando hacia abajo (sentido horario)
+      const tipOver = createCurvedArrowTip(0xef4444);
+      const thOver = Math.PI * 0.12;
+      tipOver.position.set(b + rOver * Math.cos(thOver), rOver * Math.sin(thOver), 0.02);
+      tipOver.rotation.z = -Math.PI * 0.38;
+      momentArcGroup.add(tipOver);
+
+      // 2. Momento estabilizador M_est (Antihorario, Verde)
+      // Situado en el cuadrante superior izquierdo de O: theta va de 0.48*PI (86°) a 0.88*PI (158°)
+      // Altura mínima: r * sin(0.88*PI) = 2.5 * 0.368 = 0.92 m sobre el piso -> ¡TOTALMENTE ELEVADO!
+      const rStab = 2.5;
+      const arcStabGeo = new THREE.RingGeometry(rStab - 0.04, rStab + 0.05, 42, 1, Math.PI * 0.48, Math.PI * 0.40);
+      const arcStabMesh = new THREE.Mesh(arcStabGeo, new THREE.MeshBasicMaterial({ color: 0x10b981, side: THREE.DoubleSide }));
+      arcStabMesh.position.set(b, 0, 0.02);
+      momentArcGroup.add(arcStabMesh);
+
+      // Punta cónica en theta = 0.88*PI apuntando hacia la base (sentido antihorario)
+      const tipStab = createCurvedArrowTip(0x10b981);
+      const thStab = Math.PI * 0.88;
+      tipStab.position.set(b + rStab * Math.cos(thStab), rStab * Math.sin(thStab), 0.02);
+      tipStab.rotation.z = Math.PI * 0.38;
+      momentArcGroup.add(tipStab);
+
+      // Brazo de palanca del peso (elevado sobre la base en y=0.08 m)
+      const armLine = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(b / 2, 0.08, 0.02), new THREE.Vector3(b, 0.08, 0.02)]),
+        new THREE.LineDashedMaterial({ color: 0xfacc15, dashSize: 0.12, gapSize: 0.08 })
+      );
+      armLine.computeLineDistances();
+      momentArcGroup.add(armLine);
+    }
+
+    function createCurvedArrowTip(color) {
+      const cone = new THREE.Mesh(
+        new THREE.ConeGeometry(0.16, 0.36, 20),
+        new THREE.MeshBasicMaterial({ color: color })
+      );
+      return cone;
+    }
+
+    // Creador de Flechas Vectoriales de Alta Visibilidad
+    function createHighVisArrow({ color, dir, origin, length, headLength, headWidth, shaftRadius, glowIntensity = 0.3 }) {
+      const group = new THREE.Group();
+      dir.normalize();
+
+      const shaftLen = Math.max(0.02, length - headLength);
+      const shaftGeo = new THREE.CylinderGeometry(shaftRadius, shaftRadius, shaftLen, 20);
+      shaftGeo.translate(0, shaftLen / 2, 0);
+
+      const headGeo = new THREE.ConeGeometry(headWidth, headLength, 24);
+      headGeo.translate(0, shaftLen + headLength / 2, 0);
+
+      const mat = new THREE.MeshStandardMaterial({
+        color: color,
+        roughness: 0.2,
+        metalness: 0.15,
+        emissive: color,
+        emissiveIntensity: glowIntensity,
+        depthTest: false // GARANTIZA QUE NO SE OCULTE DENTRO DEL VOLUMEN
+      });
+      group.renderOrder = 999;
+
+      const shaftMesh = new THREE.Mesh(shaftGeo, mat);
+      const headMesh = new THREE.Mesh(headGeo, mat);
+      shaftMesh.renderOrder = 999;
+      headMesh.renderOrder = 999;
+      group.add(shaftMesh, headMesh);
+
+      const quat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+      group.setRotationFromQuaternion(quat);
+      group.position.copy(origin);
+
+      return group;
+    }
+
+    // =========================================================================
+    // FASES Y NAVEGACIÓN (MODO 1: ESTÁTICA)
+    // =========================================================================
+
+    function applyPhase(phaseIndex) {
+      currentPhase = phaseIndex;
+      document.querySelectorAll('.phase-dot').forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === phaseIndex);
+      });
+
+      pressure2DGroup.visible = (phaseIndex === 1 || phaseIndex === 3);
+      pressurePrismGroup.visible = (phaseIndex === 2);
+      fhGroup.visible = (phaseIndex >= 3);
+      weightGroup.visible = (phaseIndex >= 4);
+      frictionGroup.visible = (phaseIndex >= 4);
+      overturnGroup.visible = (phaseIndex === 5);
+
+      if (phaseIndex === 2) {
+        setDimension(true);
+      } else if (phaseIndex === 0 || phaseIndex === 1) {
+        setDimension(false);
+      }
+    }
+
+    function setDimension(to3D) {
+      is3D = to3D;
+      document.getElementById('btn-dimension').classList.toggle('active', is3D);
+      document.getElementById('btn-dimension-fail').classList.toggle('active', is3D);
+      desiredCamPos = is3D ? pos3D.clone() : pos2D.clone();
+      desiredLookAt = is3D ? new THREE.Vector3(1.5, 2.5, 0) : camTarget.clone();
+    }
+
+    // =========================================================================
+    // CAMBIO DE APARTADO / MODO (ESTÁTICA vs FALLA ESTRUCTURAL)
+    // =========================================================================
+
+    const tabStatic = document.getElementById('tab-static');
+    const tabFailure = document.getElementById('tab-failure');
+    const uiHud = document.getElementById('ui-hud');
+    const failHud = document.getElementById('failure-hud');
+    const phaseDots = document.getElementById('phase-dots');
+
+    tabStatic.addEventListener('click', () => switchMode(MODE_STATIC));
+    tabFailure.addEventListener('click', () => switchMode(MODE_FAILURE));
+
+    function switchMode(newMode) {
+      activeMode = newMode;
+      const isStatic = (activeMode === MODE_STATIC);
+
+      tabStatic.classList.toggle('active', isStatic);
+      tabFailure.classList.toggle('active', !isStatic);
+
+      staticSceneGroup.visible = isStatic;
+      failureSceneGroup.visible = !isStatic;
+
+      uiHud.style.display = isStatic ? 'flex' : 'none';
+      failHud.classList.toggle('active', !isStatic);
+      phaseDots.style.display = isStatic ? 'flex' : 'none';
+
+      // Posicionamiento de cámara óptimo para cada modo
+      if (!isStatic) {
+        resetFailureSim();
+        desiredCamPos = new THREE.Vector3(2.5, 3.2, 13.5);
+        desiredLookAt = new THREE.Vector3(1.5, 2.5, 0);
+      } else {
+        applyPhase(currentPhase);
+      }
+    }
+
+    // Lógica del Modo Falla Estructural
+    const btnFractureTrigger = document.getElementById('btn-fracture-trigger');
+    const btnSlowMo = document.getElementById('btn-slowmo');
+    const btnResetFail = document.getElementById('btn-reset-fail');
+
+    btnFractureTrigger.addEventListener('click', triggerFracture);
+    btnSlowMo.addEventListener('click', () => {
+      isSlowMo = !isSlowMo;
+      btnSlowMo.classList.toggle('active', isSlowMo);
+    });
+    btnResetFail.addEventListener('click', resetFailureSim);
+
+    function triggerFracture() {
+      if (failureState === 0) {
+        failureState = 1; // Inicia simulación de fractura
+        btnFractureTrigger.classList.add('active');
+      }
+    }
+
+    function resetFailureSim() {
+      failureState = 0;
+      failureProgress = 0;
+      btnFractureTrigger.classList.remove('active');
+      upperWallPivot.rotation.z = 0;
+      upperWallPivot.position.set(B_THIN, Y_CRACK, 0);
+      floodSurgeMesh.visible = false;
+      floodSurgeMesh.scale.set(0.01, 0.01, 1);
+      crackPlane.scale.set(1, 1, 1);
+      crackPlane.material.color.setHex(0xef4444);
+    }
+
+    // =========================================================================
+    // ACTUALIZACIÓN DE ETIQUETAS DINÁMICAS (MATERIALES, FUERZAS Y MOMENTOS)
+    // =========================================================================
+
+    const labelWater = document.getElementById('label-water');
+    const labelConcrete = document.getElementById('label-concrete');
+
+    const lblFH = document.getElementById('lbl-fh');
+    const lblCP = document.getElementById('lbl-cp');
+    const lblW = document.getElementById('lbl-w');
+    const lblN = document.getElementById('lbl-n');
+    const lblFR = document.getElementById('lbl-fr');
+    const lblMV = document.getElementById('lbl-mv');
+    const lblME = document.getElementById('lbl-me');
+    const lblPIV = document.getElementById('lbl-piv');
+
+    let hudHidden = false;
+
+    const tempV = new THREE.Vector3();
+    function updateLabelsPosition() {
+      if (hudHidden) {
+        labelWater.style.display = 'none';
+        labelConcrete.style.display = 'none';
+        [lblFH, lblCP, lblW, lblN, lblFR, lblMV, lblME, lblPIV].forEach(el => el.classList.remove('visible'));
+        return;
+      }
+
+      labelWater.style.display = 'flex';
+      labelConcrete.style.display = 'flex';
+
+      // 1. Etiqueta Agua: en el centroide de la masa de agua
+      tempV.set(-2.5, H_WATER * 0.72, FRONT_PLANE_Z);
+      tempV.project(camera);
+      labelWater.style.left = `${(tempV.x * 0.5 + 0.5) * window.innerWidth}px`;
+      labelWater.style.top = `${(-(tempV.y * 0.5) + 0.5) * window.innerHeight}px`;
+
+      // 2. Etiqueta Hormigón: sobre la parte superior del muro
+      const bUse = (activeMode === MODE_STATIC) ? currentB : B_THIN;
+      tempV.set(bUse / 2, H_WALL * 0.90, FRONT_PLANE_Z);
+      tempV.project(camera);
+      labelConcrete.style.left = `${(tempV.x * 0.5 + 0.5) * window.innerWidth}px`;
+      labelConcrete.style.top = `${(-(tempV.y * 0.5) + 0.5) * window.innerHeight}px`;
+
+      // Etiquetas de Fuerzas y Momentos en Modo Estática
+      if (activeMode === MODE_STATIC) {
+        // F_H (arriba del fuste de empuje hidrostático, claramente a la izquierda del muro)
+        const showFH = (currentPhase >= 3);
+        setLabelPos(lblFH, -FH_LEN * 0.58, Y_CP + 0.48, FRONT_PLANE_Z, showFH);
+
+        // Fracción h/3 (claramente separada de F_H, a la izquierda de la cota vertical)
+        setLabelPos(lblCP, -0.62, Y_CP * 0.52, FRONT_PLANE_Z, showFH);
+
+        // W, N y F_R (Fase >= 4)
+        const showGravityAndFriction = (currentPhase >= 4);
+        const xCentroid = currentB / 2;
+        const xW = xCentroid - 0.35;
+        const xN = Math.min(currentB - 0.4, xCentroid + 0.45);
+
+        // Etiqueta W: a la izquierda del vector peso, a media altura del muro (y = 2.2 m)
+        setLabelPos(lblW, xW - 0.48, H_WALL / 2 - 0.8, FRONT_PLANE_Z, showGravityAndFriction);
+
+        // Etiqueta N: a la derecha del vector normal, a media altura de la flecha N (y = 1.1 m)
+        setLabelPos(lblN, xN + 0.48, 1.1, FRONT_PLANE_Z, showGravityAndFriction);
+
+        // Etiqueta F_R: sobre el vector de rozamiento en la base (y = 0.45 m)
+        const frLenCur = Math.max(0.6, (currentB / B_DESIGN) * 2.8);
+        setLabelPos(lblFR, currentB * 0.75 - frLenCur * 0.5, 0.45, FRONT_PLANE_Z, showGravityAndFriction);
+
+        // Momentos M_volc, M_est y Pivote O (Fase 5) - ¡Totalmente elevados sobre el piso!
+        const showMoments = (currentPhase === 5);
+        const rOver = 1.7;
+        const rStab = 2.5;
+
+        // M_volc: en el aire, a la derecha del muro, sobre el arco rojo (y ~ 1.1 m sobre el piso)
+        setLabelPos(lblMV, currentB + rOver * 0.78 + 0.5, rOver * 0.65, FRONT_PLANE_Z, showMoments);
+
+        // M_est: en el aire, arriba a la izquierda del arco verde estabilizador (y ~ 2.5 m sobre el piso)
+        setLabelPos(lblME, currentB - rStab * 0.48, rStab * 0.88 + 0.38, FRONT_PLANE_Z, showMoments);
+
+        // Pivote O: en la esquina exterior inferior
+        setLabelPos(lblPIV, currentB + 0.38, -0.28, FRONT_PLANE_Z, showMoments);
+      } else {
+        // En Modo Falla ocultar etiquetas de fuerzas estáticas
+        [lblFH, lblCP, lblW, lblN, lblFR, lblMV, lblME, lblPIV].forEach(el => el.classList.remove('visible'));
+      }
+    }
+
+    function setLabelPos(domEl, x, y, z, isVisible) {
+      if (!isVisible) {
+        domEl.classList.remove('visible');
+        return;
+      }
+      tempV.set(x, y, z);
+      tempV.project(camera);
+      if (tempV.z > 1) {
+        domEl.classList.remove('visible');
+        return;
+      }
+      domEl.style.left = `${(tempV.x * 0.5 + 0.5) * window.innerWidth}px`;
+      domEl.style.top = `${(-(tempV.y * 0.5) + 0.5) * window.innerHeight}px`;
+      domEl.classList.add('visible');
+    }
+
+    // =========================================================================
+    // EVENTOS Y CONTROLES DEL HUD
+    // =========================================================================
+
+    // Slider de Ancho (Modo 1)
+    const sliderWidth = document.getElementById('slider-width');
+    sliderWidth.addEventListener('input', (e) => {
+      currentB = parseFloat(e.target.value);
+      updateWallGeometry(currentB);
+
+      // Micro-deslizamiento o inclinación si b es muy pequeño
+      if (currentB < 1.8) {
+        wallRootGroup.rotation.z = -0.06 * (1.8 - currentB);
+        wallRootGroup.position.x = 0.15 * (1.8 - currentB);
+      } else if (currentB < 2.06) {
+        wallRootGroup.rotation.z = 0;
+        wallRootGroup.position.x = 0.25 * (2.06 - currentB);
+      } else {
+        wallRootGroup.rotation.z = 0;
+        wallRootGroup.position.x = 0;
+      }
+    });
+
+    // Play / Pausa (Modo 1)
+    const btnPlay = document.getElementById('btn-play');
+    const iconPlay = document.getElementById('icon-play');
+    const iconPause = document.getElementById('icon-pause');
+    btnPlay.addEventListener('click', togglePlay);
+
+    function togglePlay() {
+      isPlaying = !isPlaying;
+      iconPlay.style.display = isPlaying ? 'none' : 'block';
+      iconPause.style.display = isPlaying ? 'block' : 'none';
+      btnPlay.classList.toggle('active', isPlaying);
+    }
+    togglePlay(); // Inicia en reproducción automática
+
+    // Fase Siguiente y Anterior
+    document.getElementById('btn-next').addEventListener('click', () => {
+      applyPhase((currentPhase + 1) % 6);
+      cinematicTimer = 0;
+    });
+    document.getElementById('btn-prev').addEventListener('click', () => {
+      applyPhase((currentPhase - 1 + 6) % 6);
+      cinematicTimer = 0;
+    });
+
+    document.querySelectorAll('.phase-dot').forEach(dot => {
+      dot.addEventListener('click', () => {
+        applyPhase(parseInt(dot.getAttribute('data-phase')));
+        cinematicTimer = 0;
+      });
+    });
+
+    document.getElementById('btn-dimension').addEventListener('click', () => setDimension(!is3D));
+    document.getElementById('btn-dimension-fail').addEventListener('click', () => setDimension(!is3D));
+
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      currentB = B_DESIGN;
+      sliderWidth.value = B_DESIGN;
+      updateWallGeometry(currentB);
+      applyPhase(0);
+      setDimension(false);
+      cinematicTimer = 0;
+    });
+
+    document.getElementById('btn-fullscreen').addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    });
+
+    // Atajos de Teclado
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (activeMode === MODE_STATIC) togglePlay();
+        else triggerFracture();
+      } else if (e.key === 'v' || e.key === 'V') {
+        setDimension(!is3D);
+      } else if (e.key === 't' || e.key === 'T') {
+        switchMode(activeMode === MODE_STATIC ? MODE_FAILURE : MODE_STATIC);
+      } else if (e.key === 'h' || e.key === 'H') {
+        hudHidden = !hudHidden;
+        uiHud.classList.toggle('hidden', hudHidden);
+        failHud.classList.toggle('hidden', hudHidden);
+        phaseDots.classList.toggle('hidden', hudHidden);
+      } else if (e.key >= '1' && e.key <= '6' && activeMode === MODE_STATIC) {
+        applyPhase(parseInt(e.key) - 1);
+        cinematicTimer = 0;
+      } else if (e.key === 'r' || e.key === 'R') {
+        if (activeMode === MODE_STATIC) document.getElementById('btn-reset').click();
+        else resetFailureSim();
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // =========================================================================
+    // BUCLE PRINCIPAL DE ANIMACIÓN
+    // =========================================================================
+
+    const clock = new THREE.Clock();
+    applyPhase(0);
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const delta = clock.getDelta();
+      const time = clock.getElapsedTime();
+
+      // Transición suave de cámara
+      camera.position.lerp(desiredCamPos, 0.05);
+      controls.target.lerp(desiredLookAt, 0.05);
+      controls.update();
+
+      // Actualizar posición de etiquetas
+      updateLabelsPosition();
+
+      // Ondulación sutil de agua
+      waterTopMesh.position.y = H_WATER + Math.sin(time * 2.2) * 0.015;
+
+      // Pulsación sutil del vector resultante FH (Magenta)
+      const pulse = 1.0 + Math.sin(time * 3.8) * 0.07;
+      if (fhGroup.visible) {
+        arrowFH.scale.set(pulse, pulse, pulse);
+      }
+
+      // Animación Cinemática en Modo Estática
+      if (activeMode === MODE_STATIC && isPlaying) {
+        cinematicTimer += delta;
+        if (cinematicTimer >= PHASE_DURATION) {
+          cinematicTimer = 0;
+          applyPhase((currentPhase + 1) % 6);
+        }
+      }
+
+      // Animación Física del Modo Falla Estructural
+      if (activeMode === MODE_FAILURE && failureState === 1) {
+        const speed = isSlowMo ? 0.35 : 1.2;
+        failureProgress += delta * speed;
+
+        // Fase A: Grieta y fractura progresiva
+        if (failureProgress < 0.4) {
+          const t = failureProgress / 0.4;
+          crackPlane.scale.set(1 + t * 0.3, 1 + t * 2.0, 1);
+          crackPlane.material.color.setRGB(1, 0.2 - t * 0.2, 0.2 - t * 0.2);
+        }
+        // Fase B: Colapso y vuelco violento del bloque superior
+        else if (failureProgress < 2.0) {
+          const tRot = (failureProgress - 0.4) / 1.6;
+          // Rotación acelerada hacia adelante (eje en B_THIN, Y_CRACK)
+          const angle = Math.min(Math.PI * 0.46, Math.pow(tRot, 1.8) * Math.PI * 0.46);
+          upperWallPivot.rotation.z = -angle;
+
+          // Desplazamiento de agua desbordada
+          floodSurgeMesh.visible = true;
+          const floodScaleX = Math.min(1.0, tRot * 1.2);
+          floodSurgeMesh.scale.set(floodScaleX, 1, 1);
+        }
+        // Fase C: Impacto final
+        else {
+          failureState = 2; // Roto y estabilizado en el suelo
+        }
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
