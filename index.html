@@ -703,19 +703,19 @@
     <div class="dp-list">
       <div class="dp-item">
         <span class="dp-label">Altura muro:</span>
-        <span class="dp-val"><span class="math-sym">H</span> = 6.0 m</span>
+        <span class="dp-val"><span class="math-sym">H</span> = 6.00 m</span>
       </div>
       <div class="dp-item">
         <span class="dp-label">Nivel de agua:</span>
-        <span class="dp-val"><span class="math-sym">h</span> = 5.0 m</span>
+        <span class="dp-val"><span class="math-sym">h</span> = 5.00 m</span>
       </div>
       <div class="dp-item">
         <span class="dp-label">Peso esp. hormigón:</span>
-        <span class="dp-val">&gamma;<sub>c</sub> = 23.6 kN/m³</span>
+        <span class="dp-val">&gamma;<sub>c</sub> = 23.60 kN/m³</span>
       </div>
       <div class="dp-item">
         <span class="dp-label">Peso esp. agua:</span>
-        <span class="dp-val">&gamma;<sub>w</sub> = 9.80 kN/m³</span>
+        <span class="dp-val">&gamma;<sub>w</sub> = 9.81 kN/m³</span>
       </div>
       <div class="dp-item">
         <span class="dp-label">Fricción base (&mu;):</span>
@@ -723,11 +723,11 @@
       </div>
       <div class="dp-item">
         <span class="dp-label">Seg. deslizamiento:</span>
-        <span class="dp-val">FS<sub>des</sub> = 1.5</span>
+        <span class="dp-val">FS<sub>des</sub> = 1.50</span>
       </div>
       <div class="dp-item">
         <span class="dp-label">Seg. vuelco:</span>
-        <span class="dp-val">FS<sub>vuelco</sub> &ge; 1.5 (&iquest;Cumple?)</span>
+        <span class="dp-val">FS<sub>vuelco</sub> &ge; 1.50 (&iquest;Cumple?)</span>
       </div>
       <div class="dp-item highlight">
         <span class="dp-label">Profundidad unitaria:</span>
@@ -741,14 +741,14 @@
   </div>
 
   <!-- Cotas de Dimensiones del Hormigón Aislado (Fase 7) -->
-  <div class="dim-label height" id="lbl-dim-h"><span class="math-sym">H</span> = 6.0 m</div>
+  <div class="dim-label height" id="lbl-dim-h"><span class="math-sym">H</span> = 6.00 m</div>
   <div class="dim-label width" id="lbl-dim-w"><span class="math-sym">b</span> = ? &nbsp;<span style="font-weight:400;opacity:0.85;">(3.09 m)</span></div>
   <div class="dim-label depth" id="lbl-dim-b"><span class="math-sym">B</span></div>
 
   <!-- Tarjeta de síntesis volumétrica con letra B (Fase 7) -->
   <div id="iso-formula-card">
-    <div class="ifc-row"><span class="math-sym">V</span> = <span class="math-sym">b</span> &middot; 6.0 &middot; <span class="math-sym">B</span></div>
-    <div class="ifc-row"><span class="math-sym">W</span> = 23.6 &middot; (6.0 &middot; <span class="math-sym">b</span> &middot; <span class="math-sym">B</span>) = 141.6 &middot; <span class="math-sym">b</span> &middot; <span class="math-sym">B</span> kN</div>
+    <div class="ifc-row"><span class="math-sym">V</span> = <span class="math-sym">b</span> &middot; 6.00 &middot; <span class="math-sym">B</span></div>
+    <div class="ifc-row"><span class="math-sym">W</span> = 23.60 &middot; (6.00 &middot; <span class="math-sym">b</span> &middot; <span class="math-sym">B</span>) = 141.60 &middot; <span class="math-sym">b</span> &middot; <span class="math-sym">B</span> kN</div>
     <div class="ifc-note">&star; La dimensi&oacute;n <span class="math-sym">B</span> se cancela en el factor de seguridad</div>
   </div>
 
@@ -1787,10 +1787,10 @@
       }
       const ifc = document.getElementById('iso-formula-card');
       if (ifc) {
-        const weight = (23.6 * 6.0 * currentB).toFixed(1);
+        const weight = (23.60 * 6.00 * currentB).toFixed(2);
         ifc.innerHTML = `
-          <div class="ifc-row"><span class="math-sym">V</span> = <span class="math-sym">b</span> &middot; 6.0 &middot; <span class="math-sym">B</span></div>
-          <div class="ifc-row"><span class="math-sym">W</span> = 23.6 &middot; (6.0 &middot; <span class="math-sym">b</span> &middot; <span class="math-sym">B</span>) = ${weight} &middot; <span class="math-sym">B</span> kN</div>
+          <div class="ifc-row"><span class="math-sym">V</span> = <span class="math-sym">b</span> &middot; 6.00 &middot; <span class="math-sym">B</span></div>
+          <div class="ifc-row"><span class="math-sym">W</span> = 23.60 &middot; (6.00 &middot; <span class="math-sym">b</span> &middot; <span class="math-sym">B</span>) = ${weight} &middot; <span class="math-sym">B</span> kN</div>
           <div class="ifc-note">&star; La dimensi&oacute;n <span class="math-sym">B</span> se cancela en el factor de seguridad</div>
         `;
       }
@@ -1857,8 +1857,8 @@
       const ifc = document.getElementById('iso-formula-card');
       if (ifc) {
         ifc.innerHTML = `
-          <div class="ifc-row"><span class="math-sym">V</span> = <span class="math-sym">b</span> &middot; 6.0 &middot; <span class="math-sym">B</span></div>
-          <div class="ifc-row"><span class="math-sym">W</span> = 23.6 &middot; (6.0 &middot; <span class="math-sym">b</span> &middot; <span class="math-sym">B</span>) = 141.6 &middot; <span class="math-sym">b</span> &middot; <span class="math-sym">B</span> kN</div>
+          <div class="ifc-row"><span class="math-sym">V</span> = <span class="math-sym">b</span> &middot; 6.00 &middot; <span class="math-sym">B</span></div>
+          <div class="ifc-row"><span class="math-sym">W</span> = 23.60 &middot; (6.00 &middot; <span class="math-sym">b</span> &middot; <span class="math-sym">B</span>) = 141.60 &middot; <span class="math-sym">b</span> &middot; <span class="math-sym">B</span> kN</div>
           <div class="ifc-note">&star; La dimensi&oacute;n <span class="math-sym">B</span> se cancela en el factor de seguridad</div>
         `;
       }
