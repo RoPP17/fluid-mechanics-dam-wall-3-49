@@ -486,6 +486,173 @@
       z-index: 10;
       pointer-events: none;
     }
+
+    /* Cuadro de Datos del Enunciado (Fase 6) */
+    #data-panel {
+      position: absolute;
+      top: 85px;
+      right: 32px;
+      width: 330px;
+      background: rgba(11, 17, 32, 0.90);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 20px;
+      padding: 18px 22px;
+      box-shadow: 0 16px 42px rgba(0, 0, 0, 0.75);
+      z-index: 22;
+      opacity: 0;
+      transform: translateX(35px);
+      pointer-events: none;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #data-panel.visible {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+    .dp-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .dp-tag {
+      font-size: 13px;
+      font-weight: 800;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    .dp-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #f1f5f9;
+    }
+    .dp-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .dp-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      line-height: 1.3;
+      padding: 3px 0;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.07);
+    }
+    .dp-label {
+      color: #94a3b8;
+      font-weight: 500;
+    }
+    .dp-val {
+      font-weight: 700;
+      color: #f8fafc;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    }
+    .dp-item.highlight {
+      background: rgba(250, 204, 21, 0.1);
+      padding: 5px 8px;
+      border-radius: 8px;
+      border-bottom: none;
+    }
+    .dp-item.highlight .dp-val {
+      color: #facc15;
+    }
+    .dp-item.target {
+      background: rgba(244, 63, 94, 0.12);
+      padding: 5px 8px;
+      border-radius: 8px;
+      border-bottom: none;
+    }
+    .dp-item.target .dp-val {
+      color: #f43f5e;
+    }
+
+    /* Cotas Técnicas del Hormigón Aislado (Fase 7) */
+    .dim-label {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 20;
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background: rgba(11, 17, 32, 0.94);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8), inset 0 0 1px rgba(255, 255, 255, 0.3);
+      transition: opacity 0.25s ease;
+      opacity: 0;
+    }
+    .dim-label.visible {
+      display: flex;
+      opacity: 1;
+    }
+    .dim-label.height {
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.6);
+    }
+    .dim-label.width {
+      color: #f43f5e;
+      border: 1px solid rgba(244, 63, 94, 0.6);
+    }
+    .dim-label.depth {
+      color: #facc15;
+      border: 1px solid rgba(250, 204, 21, 0.6);
+      font-size: 15px;
+    }
+
+    /* Tarjeta de formulación volumétrica (Fase 7) */
+    #iso-formula-card {
+      position: absolute;
+      bottom: 90px;
+      left: 32px;
+      background: rgba(11, 17, 32, 0.90);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 16px;
+      padding: 14px 20px;
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+      z-index: 22;
+      opacity: 0;
+      transform: translateY(18px);
+      transition: all 0.35s ease;
+    }
+    #iso-formula-card.visible {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .ifc-row {
+      font-size: 13px;
+      font-weight: 700;
+      color: #e2e8f0;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    }
+    .ifc-note {
+      font-size: 11px;
+      color: #facc15;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
   </style>
 </head>
 <body>
@@ -522,6 +689,64 @@
   <div class="force-label mv" id="lbl-mv"><span class="math-sym">M</span><span class="sub-sym">volc</span></div>
   <div class="force-label me" id="lbl-me"><span class="math-sym">M</span><span class="sub-sym">est</span></div>
   <div class="force-label piv" id="lbl-piv"><span class="math-sym">O</span></div>
+
+  <!-- Panel de Datos del Enunciado (Fase 6) -->
+  <div id="data-panel">
+    <div class="dp-header">
+      <span class="dp-tag">3.49</span>
+      <span class="dp-title">Datos del Problema</span>
+    </div>
+    <div class="dp-list">
+      <div class="dp-item">
+        <span class="dp-label">Altura muro:</span>
+        <span class="dp-val"><span class="math-sym">H</span> = 6.0 m</span>
+      </div>
+      <div class="dp-item">
+        <span class="dp-label">Nivel de agua:</span>
+        <span class="dp-val"><span class="math-sym">h</span> = 5.0 m</span>
+      </div>
+      <div class="dp-item">
+        <span class="dp-label">Peso esp. hormigón:</span>
+        <span class="dp-val">&gamma;<sub>c</sub> = 23.6 kN/m³</span>
+      </div>
+      <div class="dp-item">
+        <span class="dp-label">Peso esp. agua:</span>
+        <span class="dp-val">&gamma;<sub>w</sub> = 9.80 kN/m³</span>
+      </div>
+      <div class="dp-item">
+        <span class="dp-label">Fricción base (&mu;):</span>
+        <span class="dp-val">&mu; = 0.42</span>
+      </div>
+      <div class="dp-item">
+        <span class="dp-label">Seg. deslizamiento:</span>
+        <span class="dp-val">FS<sub>des</sub> = 1.5</span>
+      </div>
+      <div class="dp-item">
+        <span class="dp-label">Seg. vuelco:</span>
+        <span class="dp-val">FS<sub>vuelco</sub> &ge; 1.5 (&iquest;Cumple?)</span>
+      </div>
+      <div class="dp-item highlight">
+        <span class="dp-label">Profundidad unitaria:</span>
+        <span class="dp-val"><span class="math-sym">B</span> (se cancela)</span>
+      </div>
+      <div class="dp-item target">
+        <span class="dp-label">Anchura requerida:</span>
+        <span class="dp-val"><span class="math-sym">b</span> = ? &rarr; 3.09 m</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cotas de Dimensiones del Hormigón Aislado (Fase 7) -->
+  <div class="dim-label height" id="lbl-dim-h"><span class="math-sym">H</span> = 6.0 m</div>
+  <div class="dim-label width" id="lbl-dim-w"><span class="math-sym">b</span> = ? &nbsp;<span style="font-weight:400;opacity:0.85;">(3.09 m)</span></div>
+  <div class="dim-label depth" id="lbl-dim-b"><span class="math-sym">B</span></div>
+
+  <!-- Tarjeta de síntesis volumétrica con letra B (Fase 7) -->
+  <div id="iso-formula-card">
+    <div class="ifc-row"><span class="math-sym">V</span> = <span class="math-sym">b</span> &middot; 6.0 &middot; <span class="math-sym">B</span></div>
+    <div class="ifc-row"><span class="math-sym">W</span> = 23.6 &middot; (6.0 &middot; <span class="math-sym">b</span> &middot; <span class="math-sym">B</span>) = 141.6 &middot; <span class="math-sym">b</span> &middot; <span class="math-sym">B</span> kN</div>
+    <div class="ifc-note">&star; La dimensi&oacute;n <span class="math-sym">B</span> se cancela en el factor de seguridad</div>
+  </div>
 
   <!-- HUD MODO 1: ESTÁTICA Y EQUILIBRIO 3.49 -->
   <div id="ui-hud">
@@ -569,21 +794,18 @@
 
   <!-- HUD MODO 2: FALLA Y FRACTURA ESTRUCTURAL -->
   <div id="failure-hud">
-    <!-- Disparo / Ejecución de Fractura -->
     <button class="hud-btn danger" id="btn-fracture-trigger" title="Disparar Fractura">
       <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/></svg>
     </button>
 
     <div class="divider"></div>
 
-    <!-- Velocidad Lenta (Slow-Motion) para detalle en clase -->
     <button class="hud-btn" id="btn-slowmo" title="Cámara Lenta">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
     </button>
 
     <div class="divider"></div>
 
-    <!-- Alternar Vista 2D / 3D en Modo Falla -->
     <button class="hud-btn" id="btn-dimension-fail" title="2D / 3D">
       <svg viewBox="0 0 24 24">
         <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
@@ -594,20 +816,21 @@
 
     <div class="divider"></div>
 
-    <!-- Reinicio de Falla -->
     <button class="hud-btn" id="btn-reset-fail" title="Restaurar Pared">
       <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><polyline points="3 3 3 8 8 8"/></svg>
     </button>
   </div>
 
-  <!-- Selector de fase (Modo 1) -->
+  <!-- Selector de 8 Fases (Modo 1) -->
   <div id="phase-dots">
-    <div class="phase-dot active" data-phase="0"></div>
-    <div class="phase-dot" data-phase="1"></div>
-    <div class="phase-dot" data-phase="2"></div>
-    <div class="phase-dot" data-phase="3"></div>
-    <div class="phase-dot" data-phase="4"></div>
-    <div class="phase-dot" data-phase="5"></div>
+    <div class="phase-dot active" data-phase="0" title="Geometría base"></div>
+    <div class="phase-dot" data-phase="1" title="Presión hidrostática"></div>
+    <div class="phase-dot" data-phase="2" title="Prisma 3D"></div>
+    <div class="phase-dot" data-phase="3" title="Resultante FH"></div>
+    <div class="phase-dot" data-phase="4" title="Peso y Rozamiento"></div>
+    <div class="phase-dot" data-phase="5" title="Momentos y Vuelco"></div>
+    <div class="phase-dot" data-phase="6" title="Datos del enunciado"></div>
+    <div class="phase-dot" data-phase="7" title="Hormigón aislado y dimensiones"></div>
   </div>
 
   <div id="key-hint">[H] HUD &nbsp;|&nbsp; [Espacio] Play/Pausa &nbsp;|&nbsp; [V] 2D/3D &nbsp;|&nbsp; [T] Cambiar Apartado</div>
@@ -785,6 +1008,11 @@
     staticSceneGroup.add(wallRootGroup);
     let wallMesh = null;
     let wallWire = null;
+
+    // Cotas Técnicas de Dimensiones para Hormigón Aislado (Fase 7)
+    const concreteIsoDimsGroup = new THREE.Group();
+    concreteIsoDimsGroup.visible = false;
+    staticSceneGroup.add(concreteIsoDimsGroup);
 
     // =========================================================================
     // GRUPO DE FUERZAS Y MOMENTOS (UBICADOS EN EL PLANO FRONTAL ADELANTADO)
@@ -1063,6 +1291,9 @@
 
       // 6. Arcos de Momento
       updateMomentArcs(b);
+
+      // 7. Cotas de Dimensiones Técnicas (Fase 7: Aislamiento del Hormigón)
+      updateConcreteDims(b);
     }
 
     function updateMomentArcs(b) {
@@ -1119,6 +1350,107 @@
       return cone;
     }
 
+    function createDimArrowTip(color, dir) {
+      const cone = new THREE.Mesh(
+        new THREE.ConeGeometry(0.08, 0.22, 16),
+        new THREE.MeshBasicMaterial({ color: color })
+      );
+      const quat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
+      cone.setRotationFromQuaternion(quat);
+      return cone;
+    }
+
+    function updateConcreteDims(b) {
+      while (concreteIsoDimsGroup.children.length > 0) {
+        const obj = concreteIsoDimsGroup.children[0];
+        concreteIsoDimsGroup.remove(obj);
+        if (obj.geometry) obj.geometry.dispose();
+      }
+
+      const zFront = DEPTH_3D / 2;
+      const zBack = -DEPTH_3D / 2;
+      const offX = -0.38;
+      const offY = H_WALL + 0.38;
+      const offZ = b + 0.38;
+
+      const matLineH = new THREE.LineBasicMaterial({ color: 0x38bdf8, linewidth: 2 });
+      const matLineW = new THREE.LineBasicMaterial({ color: 0xf43f5e, linewidth: 2 });
+      const matLineB = new THREE.LineBasicMaterial({ color: 0xfacc15, linewidth: 2 });
+      const matWitness = new THREE.LineDashedMaterial({ color: 0x64748b, dashSize: 0.12, gapSize: 0.08 });
+
+      // 1. COTA ALTURA H = 6.0 m
+      const wH1 = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0, 0, zFront + 0.05),
+        new THREE.Vector3(offX - 0.25, 0, zFront + 0.05)
+      ]), matWitness);
+      wH1.computeLineDistances();
+      const wH2 = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0, H_WALL, zFront + 0.05),
+        new THREE.Vector3(offX - 0.25, H_WALL, zFront + 0.05)
+      ]), matWitness);
+      wH2.computeLineDistances();
+
+      const lineH = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(offX, 0, zFront + 0.05),
+        new THREE.Vector3(offX, H_WALL, zFront + 0.05)
+      ]), matLineH);
+
+      const tipH1 = createDimArrowTip(0x38bdf8, new THREE.Vector3(0, 1, 0));
+      tipH1.position.set(offX, 0.16, zFront + 0.05);
+      const tipH2 = createDimArrowTip(0x38bdf8, new THREE.Vector3(0, -1, 0));
+      tipH2.position.set(offX, H_WALL - 0.16, zFront + 0.05);
+
+      concreteIsoDimsGroup.add(wH1, wH2, lineH, tipH1, tipH2);
+
+      // 2. COTA ANCHO b = 3.09 m
+      const wW1 = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0, H_WALL, zFront + 0.05),
+        new THREE.Vector3(0, offY + 0.25, zFront + 0.05)
+      ]), matWitness);
+      wW1.computeLineDistances();
+      const wW2 = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(b, H_WALL, zFront + 0.05),
+        new THREE.Vector3(b, offY + 0.25, zFront + 0.05)
+      ]), matWitness);
+      wW2.computeLineDistances();
+
+      const lineW = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0, offY, zFront + 0.05),
+        new THREE.Vector3(b, offY, zFront + 0.05)
+      ]), matLineW);
+
+      const tipW1 = createDimArrowTip(0xf43f5e, new THREE.Vector3(1, 0, 0));
+      tipW1.position.set(0.16, offY, zFront + 0.05);
+      const tipW2 = createDimArrowTip(0xf43f5e, new THREE.Vector3(-1, 0, 0));
+      tipW2.position.set(b - 0.16, offY, zFront + 0.05);
+
+      concreteIsoDimsGroup.add(wW1, wW2, lineW, tipW1, tipW2);
+
+      // 3. COTA PROFUNDIDAD B
+      const wB1 = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(b, 0.02, zFront),
+        new THREE.Vector3(offZ + 0.25, 0.02, zFront)
+      ]), matWitness);
+      wB1.computeLineDistances();
+      const wB2 = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(b, 0.02, zBack),
+        new THREE.Vector3(offZ + 0.25, 0.02, zBack)
+      ]), matWitness);
+      wB2.computeLineDistances();
+
+      const lineB = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(offZ, 0.02, zBack),
+        new THREE.Vector3(offZ, 0.02, zFront)
+      ]), matLineB);
+
+      const tipB1 = createDimArrowTip(0xfacc15, new THREE.Vector3(0, 0, 1));
+      tipB1.position.set(offZ, 0.02, zBack + 0.16);
+      const tipB2 = createDimArrowTip(0xfacc15, new THREE.Vector3(0, 0, -1));
+      tipB2.position.set(offZ, 0.02, zFront - 0.16);
+
+      concreteIsoDimsGroup.add(wB1, wB2, lineB, tipB1, tipB2);
+    }
+
     // Creador de Flechas Vectoriales de Alta Visibilidad
     function createHighVisArrow({ color, dir, origin, length, headLength, headWidth, shaftRadius, glowIntensity = 0.3 }) {
       const group = new THREE.Group();
@@ -1158,23 +1490,77 @@
     // FASES Y NAVEGACIÓN (MODO 1: ESTÁTICA)
     // =========================================================================
 
+    const TOTAL_PHASES = 8;
+
     function applyPhase(phaseIndex) {
       currentPhase = phaseIndex;
       document.querySelectorAll('.phase-dot').forEach((dot, idx) => {
         dot.classList.toggle('active', idx === phaseIndex);
       });
 
-      pressure2DGroup.visible = (phaseIndex === 1 || phaseIndex === 3);
-      pressurePrismGroup.visible = (phaseIndex === 2);
-      fhGroup.visible = (phaseIndex >= 3);
-      weightGroup.visible = (phaseIndex >= 4);
-      frictionGroup.visible = (phaseIndex >= 4);
-      overturnGroup.visible = (phaseIndex === 5);
+      const dp = document.getElementById('data-panel');
+      const ifc = document.getElementById('iso-formula-card');
+      const ldh = document.getElementById('lbl-dim-h');
+      const ldw = document.getElementById('lbl-dim-w');
+      const ldb = document.getElementById('lbl-dim-b');
 
-      if (phaseIndex === 2) {
-        setDimension(true);
-      } else if (phaseIndex === 0 || phaseIndex === 1) {
-        setDimension(false);
+      if (phaseIndex === 7) {
+        // FASE 7: AISLAR ÚNICAMENTE EL HORMIGÓN CON COTAS TÉCNICAS (H = 6.0 m, b = 3.09 m, Profundidad B)
+        waterMesh.visible = false;
+        waterTopMesh.visible = false;
+        levelMarkerGroup.visible = false;
+        groundGroup.visible = false;
+        frontForcesGroup.visible = false;
+        pressurePrismGroup.visible = false;
+        if (dp) dp.classList.remove('visible');
+
+        wallRootGroup.visible = true;
+        concreteIsoDimsGroup.visible = true;
+        if (ifc) ifc.classList.add('visible');
+        if (ldh) ldh.classList.add('visible');
+        if (ldw) ldw.classList.add('visible');
+        if (ldb) ldb.classList.add('visible');
+
+        // Perspectiva isométrica optimizada sobre el prisma de hormigón
+        is3D = true;
+        document.getElementById('btn-dimension').classList.add('active');
+        desiredCamPos = new THREE.Vector3(currentB * 0.5 + 5.8, 6.2, 7.8);
+        desiredLookAt = new THREE.Vector3(currentB * 0.5, H_WALL * 0.48, 0);
+      } else {
+        // FASES 0 A 6: RESTAURAR ELEMENTOS COMPLETOS DE LA ESCENA
+        waterMesh.visible = true;
+        waterTopMesh.visible = true;
+        levelMarkerGroup.visible = true;
+        groundGroup.visible = true;
+        frontForcesGroup.visible = true;
+        concreteIsoDimsGroup.visible = false;
+        if (ifc) ifc.classList.remove('visible');
+        if (ldh) ldh.classList.remove('visible');
+        if (ldw) ldw.classList.remove('visible');
+        if (ldb) ldb.classList.remove('visible');
+
+        pressure2DGroup.visible = (phaseIndex === 1 || phaseIndex === 3);
+        pressurePrismGroup.visible = (phaseIndex === 2);
+        fhGroup.visible = (phaseIndex >= 3);
+        weightGroup.visible = (phaseIndex >= 4);
+        frictionGroup.visible = (phaseIndex >= 4);
+        overturnGroup.visible = (phaseIndex === 5 || phaseIndex === 6);
+
+        // FASE 6: CUADRO LATERAL CON TODOS LOS DATOS DEL ENUNCIADO
+        if (phaseIndex === 6) {
+          if (dp) dp.classList.add('visible');
+          is3D = true;
+          document.getElementById('btn-dimension').classList.add('active');
+          desiredCamPos = new THREE.Vector3(6.8, 5.8, 11.8);
+          desiredLookAt = new THREE.Vector3(0.5, 2.5, 0);
+        } else {
+          if (dp) dp.classList.remove('visible');
+          if (phaseIndex === 2) {
+            setDimension(true);
+          } else if (phaseIndex === 0 || phaseIndex === 1) {
+            setDimension(false);
+          }
+        }
       }
     }
 
@@ -1270,6 +1656,10 @@
     const lblME = document.getElementById('lbl-me');
     const lblPIV = document.getElementById('lbl-piv');
 
+    const lblDimH = document.getElementById('lbl-dim-h');
+    const lblDimW = document.getElementById('lbl-dim-w');
+    const lblDimB = document.getElementById('lbl-dim-b');
+
     let hudHidden = false;
 
     const tempV = new THREE.Vector3();
@@ -1277,8 +1667,28 @@
       if (hudHidden) {
         labelWater.style.display = 'none';
         labelConcrete.style.display = 'none';
-        [lblFH, lblCP, lblW, lblN, lblFR, lblMV, lblME, lblPIV].forEach(el => el.classList.remove('visible'));
+        [lblFH, lblCP, lblW, lblN, lblFR, lblMV, lblME, lblPIV, lblDimH, lblDimW, lblDimB].forEach(el => el && el.classList.remove('visible'));
         return;
+      }
+
+      // En Fase 7: AISLAR ÚNICAMENTE EL HORMIGÓN CON COTAS TÉCNICAS
+      if (activeMode === MODE_STATIC && currentPhase === 7) {
+        labelWater.style.display = 'none';
+        labelConcrete.style.display = 'none';
+        [lblFH, lblCP, lblW, lblN, lblFR, lblMV, lblME, lblPIV].forEach(el => el.classList.remove('visible'));
+
+        const zF = DEPTH_3D / 2;
+        // Cota Altura H = 6.0 m
+        setLabelPos(lblDimH, -0.72, H_WALL * 0.5, zF + 0.05, true);
+        // Cota Ancho b = ? (3.09 m)
+        setLabelPos(lblDimW, currentB * 0.5, H_WALL + 0.68, zF + 0.05, true);
+        // Cota Profundidad B
+        setLabelPos(lblDimB, currentB + 0.72, 0.08, 0, true);
+        return;
+      } else {
+        if (lblDimH) lblDimH.classList.remove('visible');
+        if (lblDimW) lblDimW.classList.remove('visible');
+        if (lblDimB) lblDimB.classList.remove('visible');
       }
 
       labelWater.style.display = 'flex';
@@ -1322,8 +1732,8 @@
         const frLenCur = Math.max(0.6, (currentB / B_DESIGN) * 2.8);
         setLabelPos(lblFR, currentB * 0.75 - frLenCur * 0.5, 0.45, FRONT_PLANE_Z, showGravityAndFriction);
 
-        // Momentos M_volc, M_est y Pivote O (Fase 5) - ¡Totalmente elevados sobre el piso!
-        const showMoments = (currentPhase === 5);
+        // Momentos M_volc, M_est y Pivote O (Fases 5 y 6) - ¡Totalmente elevados sobre el piso!
+        const showMoments = (currentPhase === 5 || currentPhase === 6);
         const rOver = 1.7;
         const rStab = 2.5;
 
@@ -1396,11 +1806,11 @@
 
     // Fase Siguiente y Anterior
     document.getElementById('btn-next').addEventListener('click', () => {
-      applyPhase((currentPhase + 1) % 6);
+      applyPhase((currentPhase + 1) % TOTAL_PHASES);
       cinematicTimer = 0;
     });
     document.getElementById('btn-prev').addEventListener('click', () => {
-      applyPhase((currentPhase - 1 + 6) % 6);
+      applyPhase((currentPhase - 1 + TOTAL_PHASES) % TOTAL_PHASES);
       cinematicTimer = 0;
     });
 
@@ -1446,7 +1856,7 @@
         uiHud.classList.toggle('hidden', hudHidden);
         failHud.classList.toggle('hidden', hudHidden);
         phaseDots.classList.toggle('hidden', hudHidden);
-      } else if (e.key >= '1' && e.key <= '6' && activeMode === MODE_STATIC) {
+      } else if (e.key >= '1' && e.key <= '8' && activeMode === MODE_STATIC) {
         applyPhase(parseInt(e.key) - 1);
         cinematicTimer = 0;
       } else if (e.key === 'r' || e.key === 'R') {
@@ -1496,7 +1906,7 @@
         cinematicTimer += delta;
         if (cinematicTimer >= PHASE_DURATION) {
           cinematicTimer = 0;
-          applyPhase((currentPhase + 1) % 6);
+          applyPhase((currentPhase + 1) % TOTAL_PHASES);
         }
       }
 
